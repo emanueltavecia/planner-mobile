@@ -30,7 +30,7 @@ function Input({ children, variant = 'primary' }: InputProps) {
 function Field({ ...rest }: TextInputProps) {
   return (
     <TextInput
-      className="flex-1 text-zinc-100 text-lg font-regular"
+      className="flex-1 text-zinc-100 text-lg font-regular leading-6"
       placeholderTextColor={colors.zinc[400]}
       cursorColor={colors.lime[300]}
       selectionColor={colors.lime[300]}

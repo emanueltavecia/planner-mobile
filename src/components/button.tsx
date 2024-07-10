@@ -11,21 +11,22 @@ interface ButtonProps extends TouchableOpacityProps {
 
 const ThemeContext = createContext<{ variant?: Variants }>({})
 
-function Button({ children, variant = 'primary', isLoading, ...rest }: ButtonProps) {
+function Button({ children, variant = 'primary', isLoading, className, ...rest }: ButtonProps) {
   return (
     <TouchableOpacity
-      
       activeOpacity={0.7}
       disabled={isLoading}
       {...rest}
+      style={{ flex: 1 }}
     >
       <View
         className={clsx(
-          "w-full h-11 flex-row items-center justify-center rounded-lg gap-2",
+          "h-11 flex-row items-center justify-center rounded-lg gap-2",
           {
             "bg-lime-300": variant === "primary",
             "bg-zinc-800": variant === "secondary",
-          }
+          },
+          className,
         )}
       >
         <ThemeContext.Provider value={{ variant }}>
