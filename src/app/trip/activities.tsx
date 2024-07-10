@@ -1,5 +1,5 @@
-import { Text, View } from "react-native";
-import { TripData } from "./[id]";
+import { Text, View } from 'react-native'
+import { TripData } from './[id]'
 
 interface ActivitiesProps {
   tripDetails: TripData

@@ -1,19 +1,25 @@
-import { Button } from "@/components/button";
-import { Input } from "@/components/input";
-import { Loading } from "@/components/loading";
-import { TripDetails, tripServer } from "@/server/trip-server";
-import { colors } from "@/styles/colors";
-import dayjs from "dayjs";
-import { router, useLocalSearchParams } from "expo-router";
-import { CalendarRange, Info, MapPin, Settings2, Calendar as IconCalendar } from "lucide-react-native";
-import { useEffect, useState } from "react";
-import { Alert, Keyboard, TouchableOpacity, View } from "react-native";
-import { Activities } from "./activities";
-import { Details } from "./details";
-import { Modal } from "@/components/modal";
-import { Calendar } from "@/components/calendar";
-import { DateData } from "react-native-calendars";
-import { calendarUtils, DatesSelected } from "@/utils/calendarUtils";
+import { Button } from '@/components/button'
+import { Input } from '@/components/input'
+import { Loading } from '@/components/loading'
+import { TripDetails, tripServer } from '@/server/trip-server'
+import { colors } from '@/styles/colors'
+import dayjs from 'dayjs'
+import { router, useLocalSearchParams } from 'expo-router'
+import {
+  CalendarRange,
+  Info,
+  MapPin,
+  Settings2,
+  Calendar as IconCalendar,
+} from 'lucide-react-native'
+import { useEffect, useState } from 'react'
+import { Alert, Keyboard, TouchableOpacity, View } from 'react-native'
+import { Activities } from './activities'
+import { Details } from './details'
+import { Modal } from '@/components/modal'
+import { Calendar } from '@/components/calendar'
+import { DateData } from 'react-native-calendars'
+import { calendarUtils, DatesSelected } from '@/utils/calendarUtils'
 
 export interface TripData extends TripDetails {
   when: string
@@ -47,7 +53,10 @@ export default function Trip() {
       const trip = await tripServer.getByID(tripID)
 
       const maxLengthDestination = 14
-      const destination = trip.destination.length > maxLengthDestination ? trip.destination.slice(0, maxLengthDestination) + '...' : trip.destination
+      const destination =
+        trip.destination.length > maxLengthDestination
+          ? trip.destination.slice(0, maxLengthDestination) + '...'
+          : trip.destination
 
       const starts_at = dayjs(trip.starts_at).format('DD')
       const monthStart = dayjs(trip.starts_at).format('MMM')
@@ -101,7 +110,7 @@ export default function Trip() {
             setShowModal(MODAL.NONE)
             getTripDetails()
           },
-        }
+        },
       ])
     } catch (error) {
       console.log(error)
@@ -120,14 +129,10 @@ export default function Trip() {
     <View className="flex-1 px-5 pt-16">
       <Input variant="tertiary">
         <MapPin color={colors.zinc[400]} size={20} />
-        <Input.Field
-          placeholder="Destino"
-          value={tripDetails.when}
-          readOnly
-        />
+        <Input.Field placeholder="Destino" value={tripDetails.when} readOnly />
 
         <TouchableOpacity activeOpacity={0.7} onPress={() => setShowModal(MODAL.UPDATE_TRIP)}>
-          <View className="size-9 bg-zinc-800 items-center justify-center rounded">
+          <View className="size-9 items-center justify-center rounded bg-zinc-800">
             <Settings2 color={colors.zinc[400]} size={20} />
           </View>
         </TouchableOpacity>
@@ -139,20 +144,21 @@ export default function Trip() {
         <Details tripID={tripDetails.id} />
       )}
 
-      <View className="w-full absolute bottom-2 self-center justify-end pb-5 z-10 bg-zinc-950">
-        <View className="w-full flex-row bg-zinc-900 p-4 rounded-lg border border-zinc-800 gap-2">
-          <Button variant={option === 'activity' ? 'primary' : 'secondary'} onPress={() => setOption('activity')}>
+      <View className="absolute bottom-2 z-10 w-full justify-end self-center bg-zinc-950 pb-5">
+        <View className="w-full flex-row gap-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+          <Button
+            variant={option === 'activity' ? 'primary' : 'secondary'}
+            onPress={() => setOption('activity')}>
             <CalendarRange
               color={option === 'activity' ? colors.lime[950] : colors.zinc[200]}
               size={20}
             />
             <Button.Title>Atividades</Button.Title>
           </Button>
-          <Button variant={option === 'details' ? 'primary' : 'secondary'} onPress={() => setOption('details')}>
-            <Info
-              color={option === 'details' ? colors.lime[950] : colors.zinc[200]}
-              size={20}
-            />
+          <Button
+            variant={option === 'details' ? 'primary' : 'secondary'}
+            onPress={() => setOption('details')}>
+            <Info color={option === 'details' ? colors.lime[950] : colors.zinc[200]} size={20} />
             <Button.Title>Detalhes</Button.Title>
           </Button>
         </View>
@@ -162,9 +168,8 @@ export default function Trip() {
         title="Atualizar viagem"
         subtitle="Somente quem criou a viagem pode editá-la."
         visible={showModal === MODAL.UPDATE_TRIP}
-        onClose={() => setShowModal(MODAL.NONE)}
-      >
-        <View className="gap-2 my-4">
+        onClose={() => setShowModal(MODAL.NONE)}>
+        <View className="my-4 gap-2">
           <Input variant="secondary">
             <MapPin color={colors.zinc[400]} size={20} />
             <Input.Field
@@ -191,15 +196,16 @@ export default function Trip() {
       </Modal>
 
       <Modal
-        title='Selecionar datas'
-        subtitle='Selecione a data de ida e volta da viagem'
+        title="Selecionar datas"
+        subtitle="Selecione a data de ida e volta da viagem"
         visible={showModal === MODAL.CALENDAR}
-        onClose={() => {setShowModal(MODAL.NONE)}}
-      >
-        <View className='gap-4 mt-4'>
+        onClose={() => {
+          setShowModal(MODAL.NONE)
+        }}>
+        <View className="mt-4 gap-4">
           <Calendar
             onDayPress={handleSelectDates}
-            markedDates={(selectedDates.dates)}
+            markedDates={selectedDates.dates}
             minDate={dayjs().toISOString()}
           />
 

@@ -11,7 +11,14 @@ import { calendarUtils, DatesSelected } from '@/utils/calendarUtils'
 import { validateInput } from '@/utils/validateInput'
 import dayjs from 'dayjs'
 import { router } from 'expo-router'
-import { ArrowRight, AtSign, Calendar as CalendarIcon, MapPin, Settings2, UserRoundPlus } from 'lucide-react-native'
+import {
+  ArrowRight,
+  AtSign,
+  Calendar as CalendarIcon,
+  MapPin,
+  Settings2,
+  UserRoundPlus,
+} from 'lucide-react-native'
 import { useEffect, useState } from 'react'
 import { Alert, Image, Keyboard, Text, View } from 'react-native'
 import { DateData } from 'react-native-calendars'
@@ -39,7 +46,10 @@ export default function Index() {
 
   function handleNextStepForm() {
     if (destination.trim().length === 0 || !selectedDates.startsAt || !selectedDates.endsAt) {
-      return Alert.alert('Detalhes da viagem', 'Preencha todas as informações da viagem para continuar.')
+      return Alert.alert(
+        'Detalhes da viagem',
+        'Preencha todas as informações da viagem para continuar.',
+      )
     }
 
     if (destination.length < 4) {
@@ -122,7 +132,7 @@ export default function Index() {
   async function createTrip() {
     try {
       setIsCreatingTrip(true)
-      
+
       const newTrip = await tripServer.create({
         destination,
         starts_at: dayjs(selectedDates.startsAt?.dateString).toString(),
@@ -150,19 +160,15 @@ export default function Index() {
 
   return (
     <View className="flex-1 items-center justify-center px-5">
-      <Image
-        source={require('@/assets/logo.png')}
-        className='h-8'
-        resizeMode='contain'
-      />
+      <Image source={require('@/assets/logo.png')} className="h-8" resizeMode="contain" />
 
-      <Image source={require('@/assets/bg.png')} className='absolute' />
+      <Image source={require('@/assets/bg.png')} className="absolute" />
 
-      <Text className="text-zinc-400 font-regular text-center text-lg mt-3">
+      <Text className="mt-3 text-center font-regular text-lg text-zinc-400">
         Convide seus amigos e planeje sua{'\n'}próxima viagem
       </Text>
 
-      <View className='w-full bg-zinc-900 p-4 rounded-lg my-8 border border-zinc-800'>
+      <View className="my-8 w-full rounded-lg border border-zinc-800 bg-zinc-900 p-4">
         <Input>
           <MapPin color={colors.zinc[400]} size={20} />
           <Input.Field
@@ -187,8 +193,8 @@ export default function Index() {
 
         {stepForm === StepForm.ADD_EMAILS && (
           <>
-            <View className='border-b py-3 border-zinc-800'>
-              <Button variant='secondary' onPress={() => setStepForm(StepForm.TRIP_DETAILS)}>
+            <View className="border-b border-zinc-800 py-3">
+              <Button variant="secondary" onPress={() => setStepForm(StepForm.TRIP_DETAILS)}>
                 <Button.Title>Alterar Local/data</Button.Title>
                 <Settings2 color={colors.zinc[200]} size={20} />
               </Button>
@@ -199,7 +205,9 @@ export default function Index() {
               <Input.Field
                 placeholder="Quem estará na viagem?"
                 autoCorrect={false}
-                value={emailsToInvite.length > 0 ? `${emailsToInvite.length} pessoa(s) convidada(s)` : ''}
+                value={
+                  emailsToInvite.length > 0 ? `${emailsToInvite.length} pessoa(s) convidada(s)` : ''
+                }
                 onPress={() => {
                   Keyboard.dismiss()
                   setShowModal(MODAL.GUESTS)
@@ -211,30 +219,30 @@ export default function Index() {
         )}
 
         <Button onPress={handleNextStepForm} isLoading={isCreatingTrip}>
-            <Button.Title>
-              {stepForm === StepForm.TRIP_DETAILS ? 'Continuar' : 'Confirmar viagem'}
-            </Button.Title>
-            <ArrowRight color={colors.lime[950]} size={20} />
-          </Button>
+          <Button.Title>
+            {stepForm === StepForm.TRIP_DETAILS ? 'Continuar' : 'Confirmar viagem'}
+          </Button.Title>
+          <ArrowRight color={colors.lime[950]} size={20} />
+        </Button>
       </View>
 
-      <Text className='text-zinc-500 font-regular text-center text-base'>
+      <Text className="text-center font-regular text-base text-zinc-500">
         Ao planejar sua viagem pela plann.er você automaticamente concorda com nossos{' '}
-        <Text className='text-zinc-300 underline'>termos de uso</Text>{' '}
-        e{' '}
-        <Text className='text-zinc-300 underline'>políticas de privacidade</Text>.
+        <Text className="text-zinc-300 underline">termos de uso</Text> e{' '}
+        <Text className="text-zinc-300 underline">políticas de privacidade</Text>.
       </Text>
 
       <Modal
-        title='Selecionar datas'
-        subtitle='Selecione a data de ida e volta da viagem'
+        title="Selecionar datas"
+        subtitle="Selecione a data de ida e volta da viagem"
         visible={showModal === MODAL.CALENDAR}
-        onClose={() => {setShowModal(MODAL.NONE)}}
-      >
-        <View className='gap-4 mt-4'>
+        onClose={() => {
+          setShowModal(MODAL.NONE)
+        }}>
+        <View className="mt-4 gap-4">
           <Calendar
             onDayPress={handleSelectDates}
-            markedDates={(selectedDates.dates)}
+            markedDates={selectedDates.dates}
             minDate={dayjs().toISOString()}
           />
 
@@ -245,30 +253,31 @@ export default function Index() {
       </Modal>
 
       <Modal
-        title='Selecionar convidados'
-        subtitle='Os convidados irão receber e-mails para confirmar a participação na viagem.'
+        title="Selecionar convidados"
+        subtitle="Os convidados irão receber e-mails para confirmar a participação na viagem."
         visible={showModal === MODAL.GUESTS}
-        onClose={() => {setShowModal(MODAL.NONE)}}
-      >
-        <View className='my-2 flex-wrap gap-2 border-b border-zinc-800 py-5 items-start'>
+        onClose={() => {
+          setShowModal(MODAL.NONE)
+        }}>
+        <View className="my-2 flex-wrap items-start gap-2 border-b border-zinc-800 py-5">
           {emailsToInvite.length > 0 ? (
             emailsToInvite.map((email) => (
               <GuestEmail key={email} email={email} onRemove={() => handleRemoveEmail(email)} />
             ))
           ) : (
-            <Text className='text-zinc-600 text-base font-regular'>Nenhum email adicionado</Text>
+            <Text className="font-regular text-base text-zinc-600">Nenhum email adicionado</Text>
           )}
         </View>
 
-        <View className='gap-4 mt-4'>
-          <Input variant='secondary'>
+        <View className="mt-4 gap-4">
+          <Input variant="secondary">
             <AtSign color={colors.zinc[400]} size={20} />
             <Input.Field
-              placeholder='Digite o e-mail do convidado'
-              keyboardType='email-address'
+              placeholder="Digite o e-mail do convidado"
+              keyboardType="email-address"
               onChangeText={(text) => setEmailToInvite(text.toLowerCase())}
               value={emailToInvite}
-              returnKeyType='send'
+              returnKeyType="send"
               onSubmitEditing={handleAddEmail}
             />
           </Input>
