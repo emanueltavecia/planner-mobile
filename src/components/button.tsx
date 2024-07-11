@@ -14,16 +14,24 @@ type Variants = 'primary' | 'secondary'
 interface ButtonProps extends TouchableOpacityProps {
   variant?: Variants
   isLoading?: boolean
+  flex?: number
 }
 
 const ThemeContext = createContext<{ variant?: Variants }>({})
 
-function Button({ children, variant = 'primary', isLoading, className, ...rest }: ButtonProps) {
+function Button({
+  children,
+  variant = 'primary',
+  isLoading,
+  className,
+  flex,
+  ...rest
+}: ButtonProps) {
   return (
-    <TouchableOpacity activeOpacity={0.7} disabled={isLoading} {...rest} style={{ flex: 1 }}>
+    <TouchableOpacity activeOpacity={0.7} disabled={isLoading} {...rest} style={{ flex }}>
       <View
         className={clsx(
-          'h-11 flex-row items-center justify-center gap-2 rounded-lg',
+          'h-11 flex-row items-center justify-center gap-2 rounded-xl px-4',
           {
             'bg-lime-300': variant === 'primary',
             'bg-zinc-800': variant === 'secondary',

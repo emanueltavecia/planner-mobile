@@ -168,7 +168,7 @@ export default function Index() {
         Convide seus amigos e planeje sua{'\n'}próxima viagem
       </Text>
 
-      <View className="my-8 w-full rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+      <View className="my-8 w-full rounded-xl border border-zinc-800 bg-zinc-900 p-4 pt-2">
         <Input>
           <MapPin color={colors.zinc[400]} size={20} />
           <Input.Field
@@ -259,7 +259,7 @@ export default function Index() {
         onClose={() => {
           setShowModal(MODAL.NONE)
         }}>
-        <View className="my-2 flex-wrap items-start gap-2 border-b border-zinc-800 py-5">
+        <View className="my-2 flex-column items-start gap-2 border-b border-zinc-800 py-5">
           {emailsToInvite.length > 0 ? (
             emailsToInvite.map((email) => (
               <GuestEmail key={email} email={email} onRemove={() => handleRemoveEmail(email)} />

@@ -1,5 +1,5 @@
+import { CircleCheck, CircleDashed } from 'lucide-react-native'
 import { Text, View } from 'react-native'
-import { CircleDashed, CircleCheck } from 'lucide-react-native'
 
 import { colors } from '@/styles/colors'
 import clsx from 'clsx'
@@ -19,7 +19,7 @@ export function Activity({ data }: Props) {
   return (
     <View
       className={clsx(
-        'w-full flex-row items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3',
+        'w-full flex-row items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3',
         { 'opacity-50': data.isBefore },
       )}>
       {data.isBefore ? (

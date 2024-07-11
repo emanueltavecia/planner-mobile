@@ -1,25 +1,30 @@
 import { Button } from '@/components/button'
+import { Calendar } from '@/components/calendar'
 import { Input } from '@/components/input'
 import { Loading } from '@/components/loading'
+import { Modal } from '@/components/modal'
 import { TripDetails, tripServer } from '@/server/trip-server'
 import { colors } from '@/styles/colors'
+import { calendarUtils, DatesSelected } from '@/utils/calendarUtils'
 import dayjs from 'dayjs'
 import { router, useLocalSearchParams } from 'expo-router'
 import {
   CalendarRange,
+  Calendar as IconCalendar,
   Info,
+  Mail,
   MapPin,
   Settings2,
-  Calendar as IconCalendar,
+  User,
 } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
-import { Alert, Keyboard, TouchableOpacity, View } from 'react-native'
+import { Alert, Keyboard, Platform, Text, TouchableOpacity, View } from 'react-native'
+import { DateData } from 'react-native-calendars'
 import { Activities } from './activities'
 import { Details } from './details'
-import { Modal } from '@/components/modal'
-import { Calendar } from '@/components/calendar'
-import { DateData } from 'react-native-calendars'
-import { calendarUtils, DatesSelected } from '@/utils/calendarUtils'
+import { validateInput } from '@/utils/validateInput'
+import { participantsServer } from '@/server/participants-server'
+import { tripStorage } from '@/storage/trip'
 
 export interface TripData extends TripDetails {
   when: string
@@ -29,6 +34,7 @@ enum MODAL {
   NONE = 0,
   UPDATE_TRIP = 1,
   CALENDAR = 2,
+  CONFIRM_ATTENDANCE = 3,
 }
 
 export default function Trip() {
@@ -38,13 +44,20 @@ export default function Trip() {
   const [showModal, setShowModal] = useState(MODAL.NONE)
   const [destination, setDestination] = useState('')
   const [selectedDates, setSelectedDates] = useState({} as DatesSelected)
+  const [guestName, setGuestName] = useState('')
+  const [guestEmail, setGuestEmail] = useState('')
   const [isUpdatingTrip, setIsUpdatingTrip] = useState(false)
+  const [isConfirmingAttendance, setIsConfirmingAttendance] = useState(false)
 
-  const { id: tripID } = useLocalSearchParams<{ id: string }>()
+  const { id: tripID, participant } = useLocalSearchParams<{ id: string, participant?: string }>()
 
   async function getTripDetails() {
     try {
       setIsLoadingTrip(true)
+
+      if (participant) {
+        setShowModal(MODAL.CONFIRM_ATTENDANCE)
+      }
 
       if (!tripID) {
         return router.back()
@@ -119,6 +132,64 @@ export default function Trip() {
     }
   }
 
+  function resetFields() {
+    setGuestName('')
+    setGuestEmail('')
+    setShowModal(MODAL.NONE)
+  }
+
+  async function handleConfirmAttendance() {
+    try {
+      if (!participant || !tripID) return
+
+      if (!guestName.trim() || !guestEmail.trim()) {
+        return Alert.alert('Confirmar presença', 'Preencha todos os campos.')
+      }
+
+      if (!validateInput.email(guestEmail.trim())) {
+        return Alert.alert('Confirmar presença', 'E-mail inválido.')
+      }
+
+      setIsConfirmingAttendance(true)
+
+      await participantsServer.confirmTripByParticipantId({
+        participantId: participant,
+        name: guestName,
+        email: guestEmail.trim(),
+      })
+
+      Alert.alert('Confirmar presença', 'Viagem confirmada com sucesso.')
+
+      await tripStorage.save(tripID)
+      resetFields()
+    } catch (error) {
+      console.log(error)
+      Alert.alert('Confirmar presença', 'Erro ao confirmar presença.')
+    } finally {
+      setIsConfirmingAttendance(false)
+    }
+  }
+
+  async function handleRemoveTrip() {
+    try {
+      Alert.alert('Remover viagem', 'Tem certeza que deseja remover a viagem?', [
+        {
+          text: 'Não',
+          style: 'cancel',
+        },
+        {
+          text: 'Remover',
+          onPress: async () => {
+            await tripStorage.remove()
+            router.navigate('/')
+          },
+        }
+      ])
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   useEffect(() => {
     getTripDetails()
   }, [])
@@ -132,7 +203,7 @@ export default function Trip() {
         <Input.Field placeholder="Destino" value={tripDetails.when} readOnly />
 
         <TouchableOpacity activeOpacity={0.7} onPress={() => setShowModal(MODAL.UPDATE_TRIP)}>
-          <View className="size-9 items-center justify-center rounded bg-zinc-800">
+          <View className="size-9 items-center justify-center rounded-md bg-zinc-800">
             <Settings2 color={colors.zinc[400]} size={20} />
           </View>
         </TouchableOpacity>
@@ -144,11 +215,13 @@ export default function Trip() {
         <Details tripID={tripDetails.id} />
       )}
 
-      <View className="absolute bottom-2 z-10 w-full justify-end self-center bg-zinc-950 pb-5">
-        <View className="w-full flex-row gap-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <View
+        className={`absolute ${Platform.OS === 'android' ? 'bottom-2' : 'bottom-7'} z-10 w-full justify-end self-center rounded-2xl bg-zinc-950`}>
+        <View className="w-full flex-row gap-4 rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
           <Button
             variant={option === 'activity' ? 'primary' : 'secondary'}
-            onPress={() => setOption('activity')}>
+            onPress={() => setOption('activity')}
+            flex={1}>
             <CalendarRange
               color={option === 'activity' ? colors.lime[950] : colors.zinc[200]}
               size={20}
@@ -157,7 +230,8 @@ export default function Trip() {
           </Button>
           <Button
             variant={option === 'details' ? 'primary' : 'secondary'}
-            onPress={() => setOption('details')}>
+            onPress={() => setOption('details')}
+            flex={1}>
             <Info color={option === 'details' ? colors.lime[950] : colors.zinc[200]} size={20} />
             <Button.Title>Detalhes</Button.Title>
           </Button>
@@ -192,6 +266,10 @@ export default function Trip() {
           <Button onPress={handleUpdateTrip} isLoading={isUpdatingTrip}>
             <Button.Title>Atualizar</Button.Title>
           </Button>
+
+          <TouchableOpacity activeOpacity={0.8} onPress={handleRemoveTrip}>
+            <Text className='text-red-400 text-center mt-6'>Remover viagem</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
 
@@ -211,6 +289,43 @@ export default function Trip() {
 
           <Button onPress={() => setShowModal(MODAL.UPDATE_TRIP)}>
             <Button.Title>Confirmar</Button.Title>
+          </Button>
+        </View>
+      </Modal>
+
+      <Modal title="Confirmar presença" visible={showModal === MODAL.CONFIRM_ATTENDANCE}>
+        <View className="mt-4 gap-4">
+          <Text className="my-2 font-regular leading-6 text-zinc-400">
+            Você foi convidado(a) para participar de uma viagem para
+            <Text className="font-semibold text-zinc-100"> {tripDetails.destination} </Text>
+            nas datas de
+            <Text className="font-semibold text-zinc-100">
+              {' '}
+              {dayjs(tripDetails.starts_at).date()} de {dayjs(tripDetails.ends_at).format('MMMM')} à{' '}
+              {dayjs(tripDetails.ends_at).date()} de {dayjs(tripDetails.ends_at).format('MMMM')}.{'\n\n'}
+            </Text>
+            Para confirmar sua presença na viagem, preencha os dados abaixo:
+          </Text>
+
+          <Input variant='secondary'>
+            <User color={colors.zinc[400]} size={20} />
+            <Input.Field
+              placeholder='Seu nome completo'
+              onChangeText={setGuestName}
+            />
+          </Input>
+
+          <Input variant='secondary'>
+            <Mail color={colors.zinc[400]} size={20} />
+            <Input.Field
+              placeholder='E-mail de confirmação'
+              onChangeText={setGuestEmail}
+              value={guestEmail.toLowerCase()}
+            />
+          </Input>
+
+          <Button isLoading={isConfirmingAttendance} onPress={handleConfirmAttendance}>
+            <Button.Title>Confirmar minha presença</Button.Title>
           </Button>
         </View>
       </Modal>
