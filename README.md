@@ -18,11 +18,9 @@ The development of this project aims to learn the following concepts:
 - Route navigation
 - Save content in storage using AsyncStorage
 
-## App overview video
+## 📹 App overview video
 
-<video width="600" controls>
-  <source src="./.github/overview.mp4" type="video/mp4">
-</video>
+[Watch video](https://dms.licdn.com/playlist/vid/v2/D4D05AQHOrb4ik9YwvA/mp4-640p-30fp-crf28/mp4-640p-30fp-crf28/0/1720669966952?e=2147483647&v=beta&t=jTWbHHikWKD9ZEVF1WdVAlOCLbSZX-_2h-ZRjIuReAw)
 
 
 ## 🔗 Project Links
